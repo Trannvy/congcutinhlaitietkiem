@@ -7,7 +7,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("💰 Ứng Dụng Tính Lãi Gửi Tiết Kiệm")
+st.title("ỨNG DỤNG TÍNH ÃI GỬI TIẾT KIỆM_TRANNVY")
 st.write("Nhập thông tin tiền gửi bên dưới để tính toán lãi tiết kiệm theo **lãi đơn** hoặc **lãi kép**.")
 
 st.divider()
