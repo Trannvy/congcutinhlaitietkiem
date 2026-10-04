@@ -1,34 +1,23 @@
 import streamlit as st
 st.image("funny cat meme.jpg")
-# 1. Cấu hình trang (BẮT BUỘC ĐẶT Ở ĐẦU TIÊN)
+
+# Cấu hình trang
 st.set_page_config(
     page_title="Tính Lãi Gửi Tiết Kiệm - Trần Ngọc Thúy Vy",
     page_icon="💰",
     layout="centered"
 )
 
-# 2. Tiêu đề chính của ứng dụng
-st.title("ỨNG DỤNG TÍNH LÃI GỬI TIẾT KIỆM")
-st.caption("👤 **Tác giả:** Trần Ngọc Thúy Vy")
+# Tiêu đề chính của ứng dụng
+st.title("ỨNG DỤNG TÍNH LÃI GỬI TIẾT KIỆM_TRẦN NGỌC THÚY VY")
 
 # Tạo 2 Tab chức năng
 tab_normal, tab_zombie = st.tabs(["📊 Tính Lãi Tiết Kiệm", "🧟 Chế Độ Tận Thế & Siêu Lạm Phát"])
 
 # ===================================================================
-# TAB 1: TÍNH LÃI TIẾT KIỆM CHUẨN (CODE GỐC + ẢNH MÈO)
+# TAB 1: TÍNH LÃI TIẾT KIỆM CHUẨN (CODE GỐC CỦA BẠN)
 # ===================================================================
 with tab_normal:
-    # Hiển thị hình ảnh meme mèo
-    IMAGE_PATH = "funny cat meme.jpg"
-    if os.path.exists(IMAGE_PATH):
-        st.image(IMAGE_PATH, use_container_width=True)
-    else:
-        st.image(
-            "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=800&auto=format&fit=crop", 
-            caption="Nâng cao trải nghiệm tiết kiệm tiền cùng Boss! 🐾",
-            use_container_width=True
-        )
-
     st.write("Nhập thông tin tiền gửi bên dưới để tính toán lãi tiết kiệm theo **lãi đơn** hoặc **lãi kép**.")
     st.divider()
 
@@ -154,7 +143,7 @@ with tab_normal:
 
 
 # ===================================================================
-# TAB 2: CHẾ ĐỘ TẬN THẾ & SIÊU LẠM PHÁT (TÍNH NĂNG SÁNG TẠO)
+# TAB 2: CHẾ ĐỘ TẬN THẾ & SIÊU LẠM PHÁT (TÍNH NĂNG MỚI)
 # ===================================================================
 with tab_zombie:
     st.error("⚠️ CẢNH BÁO: GIẢ LẬP KHỦNG HOẢNG TÀI CHÍNH VÀ SIÊU LẠM PHÁT!")
