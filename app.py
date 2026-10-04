@@ -1,27 +1,26 @@
 import streamlit as st
 st.image("funny cat meme.jpg")
 
-# Cấu hình trang
+# Cấu hình trang (Bắt buộc đặt lệnh Streamlit ngay sau)
 st.set_page_config(
     page_title="Tính Lãi Gửi Tiết Kiệm - Trần Ngọc Thúy Vy",
     page_icon="💰",
     layout="centered"
 )
 
-# Tiêu đề chính của ứng dụng
+# Tiêu đề chính
 st.title("ỨNG DỤNG TÍNH LÃI GỬI TIẾT KIỆM_TRẦN NGỌC THÚY VY")
 
 # Tạo 2 Tab chức năng
-tab_normal, tab_zombie = st.tabs(["📊 Tính Lãi Tiết Kiệm", "🧟 Chế Độ Tận Thế & Siêu Lạm Phát"])
+tab_normal, tab_creative = st.tabs(["📊 Tính Lãi Tiết Kiệm", "🧋 Quy Đổi Lãi & Rút Sớm"])
 
 # ===================================================================
-# TAB 1: TÍNH LÃI TIẾT KIỆM CHUẨN (CODE GỐC CỦA BẠN)
+# TAB 1: TÍNH LÃI CHUẨN (CODE GỐC CỦA BẠN)
 # ===================================================================
 with tab_normal:
     st.write("Nhập thông tin tiền gửi bên dưới để tính toán lãi tiết kiệm theo **lãi đơn** hoặc **lãi kép**.")
     st.divider()
 
-    # Layout nhập liệu 2 cột
     col1, col2 = st.columns(2)
 
     with col1:
@@ -63,19 +62,10 @@ with tab_normal:
         key="normal_lanh_lai"
     )
 
-    # Nút tính toán
     if st.button("🚀 Tính Tiền Lãi", type="primary", use_container_width=True, key="btn_normal"):
-        r_thang = (lai_suat_nam / 100) / 12  # Lãi suất theo tháng
-        
-        # Xác định chu kỳ lãnh lãi (số tháng)
-        if hinh_thuc_lanh == "Lãnh lãi theo tháng":
-            m = 1
-        elif hinh_thuc_lanh == "Lãnh lãi theo quý":
-            m = 3
-        else:  # Lãnh lãi cuối kỳ
-            m = ky_han_thang
+        r_thang = (lai_suat_nam / 100) / 12
+        m = 1 if hinh_thuc_lanh == "Lãnh lãi theo tháng" else (3 if hinh_thuc_lanh == "Lãnh lãi theo quý" else ky_han_thang)
 
-        # Kiểm tra tính hợp lệ của kỳ hạn với hình thức lãnh lãi
         if ky_han_thang % m != 0 and hinh_thuc_lanh != "Lãnh lãi cuối kỳ":
             st.warning(f"⚠️ Kỳ hạn gửi ({ky_han_thang} tháng) không chia hết cho chu kỳ {hinh_thuc_lanh.lower()}. Kết quả tính theo số chu kỳ chẵn.")
 
@@ -94,43 +84,21 @@ with tab_normal:
         st.divider()
         st.subheader("📊 Kết Quả Tính Toán")
 
-        # Hiển thị số liệu dạng thẻ Metric
         res_col1, res_col2 = st.columns(2)
-        
         with res_col1:
-            st.metric(
-                label=f"Tài sản cuối kỳ ({ky_han_thang} tháng)", 
-                value=f"{tong_tien:,.0f} VNĐ".replace(",", ".")
-            )
-            st.metric(
-                label="Tổng tiền lãi nhận được", 
-                value=f"{tong_lai:,.0f} VNĐ".replace(",", ".")
-            )
-
+            st.metric("Tài sản cuối kỳ", f"{tong_tien:,.0f} VNĐ".replace(",", "."))
+            st.metric("Tổng tiền lãi nhận được", f"{tong_lai:,.0f} VNĐ".replace(",", "."))
         with res_col2:
-            st.metric(
-                label="Tiền gốc ban đầu", 
-                value=f"{so_tien_gui:,.0f} VNĐ".replace(",", ".")
-            )
+            st.metric("Tiền gốc ban đầu", f"{so_tien_gui:,.0f} VNĐ".replace(",", "."))
             label_dinh_ky = "Tiền lãi nhận mỗi kỳ" if loai_lai == "Lãi đơn" else "Lãi nhận trung bình/kỳ"
-            st.metric(
-                label=f"{label_dinh_ky} ({m} tháng/kỳ)", 
-                value=f"{lai_dinh_ky:,.0f} VNĐ".replace(",", ".")
-            )
+            st.metric(f"{label_dinh_ky} ({m} tháng)", f"{lai_dinh_ky:,.0f} VNĐ".replace(",", "."))
 
-        # Hiển thị bảng chi tiết các kỳ nhận lãi
         with st.expander("📝 Xem bảng chi tiết nhận lãi qua từng kỳ"):
             lich_trinh = []
             goc_dau_ky = so_tien_gui
-            
             for i in range(1, so_chu_ky + 1):
-                if loai_lai == "Lãi đơn":
-                    lai_ky = lai_dinh_ky
-                    goc_cuoi_ky = so_tien_gui
-                else:
-                    lai_ky = goc_dau_ky * r_chu_ky
-                    goc_cuoi_ky = goc_dau_ky + lai_ky
-                    
+                lai_ky = lai_dinh_ky if loai_lai == "Lãi đơn" else goc_dau_ky * r_chu_ky
+                goc_cuoi_ky = so_tien_gui if loai_lai == "Lãi đơn" else goc_dau_ky + lai_ky
                 lich_trinh.append({
                     "Kỳ": f"Kỳ {i} (Tháng {i * m})",
                     "Tiền gốc đầu kỳ (VNĐ)": f"{goc_dau_ky:,.0f}".replace(",", "."),
@@ -138,112 +106,40 @@ with tab_normal:
                     "Tổng tích lũy (VNĐ)": f"{(goc_cuoi_ky if loai_lai == 'Lãi kép' else so_tien_gui + lai_ky * i):,.0f}".replace(",", ".")
                 })
                 goc_dau_ky = goc_cuoi_ky
-
             st.dataframe(lich_trinh, use_container_width=True)
 
-
 # ===================================================================
-# TAB 2: CHẾ ĐỘ TẬN THẾ & SIÊU LẠM PHÁT (TÍNH NĂNG MỚI)
+# TAB 2: QUY ĐỔI LÃI VUI & CẢNH BÁO RÚT SỚM (Ý TƯỞNG MỚI ĐƠN GIẢN)
 # ===================================================================
-with tab_zombie:
-    st.error("⚠️ CẢNH BÁO: GIẢ LẬP KHỦNG HOẢNG TÀI CHÍNH VÀ SIÊU LẠM PHÁT!")
-    st.write("Kiểm tra sức mua thực tế của khoản tiết kiệm khi nền kinh tế bị **'Zombie Lạm Phát'** tấn công.")
+with tab_creative:
+    st.subheader("🧋 1. Tiền Lãi Của Bạn Mua Được Bằng Nào Món?")
+    c_tien_gui = st.number_input("Số tiền gửi (VNĐ):", value=50_000_000, step=5_000_000, key="c_tien")
+    c_lai_suat = st.number_input("Lãi suất (%/năm):", value=6.0, step=0.5, key="c_lai")
+    c_thang = st.number_input("Số tháng gửi:", value=12, min_value=1, key="c_thang")
 
-    st.subheader("1. Cấu hình kịch bản Tận Thế")
-    z_col1, z_col2 = st.columns(2)
+    tien_lai_du_kien = c_tien_gui * (c_lai_suat / 100 / 12) * c_thang
+
+    st.write(f"👉 Với **{tien_lai_du_kien:,.0f} VNĐ** tiền lãi, bạn có thể tự thưởng cho mình:".replace(",", "."))
     
-    with z_col1:
-        z_tien_gui = st.number_input(
-            "Số tiền gửi (VNĐ):", 
-            min_value=1_000_000, 
-            value=100_000_000, 
-            step=10_000_000,
-            format="%d",
-            key="z_tien_gui"
-        )
-        z_nam = st.slider("Số năm gửi tiết kiệm trong tận thế:", min_value=1, max_value=10, value=3)
+    q_col1, q_col2, q_col3 = st.columns(3)
+    with q_col1:
+        st.metric("🧋 Ly Trà Sữa", f"{int(tien_lai_du_kien // 50000)} ly", "50k / ly")
+    with q_col2:
+        st.metric("🎬 Vé Xem Phim", f"{int(tien_lai_du_kien // 110000)} vé", "110k / vé")
+    with q_col3:
+        st.metric("✈️ Vé Máy Bay Nội Địa", f"{int(tien_lai_du_kien // 1500000)} vé", "1.5tr / vé")
 
-    with z_col2:
-        z_lai_suat = st.number_input(
-            "Lãi suất ngân hàng (%/năm):", 
-            min_value=0.0, 
-            value=6.0, 
-            step=0.5,
-            key="z_lai_suat"
-        )
-        z_mon_an = st.selectbox("Chọn đơn vị đo lường sức mua:", ["Bát Phở (50.000 VNĐ)", "Ổ Bánh Mì (20.000 VNĐ)"])
+    st.divider()
 
-    st.subheader("2. Mức độ Siêu Lạm Phát (Kéo thanh trượt để giả lập)")
-    lam_phat = st.slider(
-        "Tỷ lệ lạm phát hàng năm (%):", 
-        min_value=3, 
-        max_value=200, 
-        value=30, 
-        step=5,
-        help="Lạm phát thông thường ~3-5%. Khủng hoảng: 20-50%. Siêu lạm phát: >100%"
-    )
+    st.subheader("🚨 2. Cảnh Báo Phạt Rút Tiền Trước Hạn")
+    st.caption("Nếu rút trước hạn, ngân hàng thường chuyển về lãi suất Không kỳ hạn (~0.2%/năm).")
+    
+    thang_rut_som = st.slider("Giả sử bạn phải rút gấp ở tháng thứ:", min_value=1, max_value=int(c_thang), value=int(c_thang // 2))
 
-    # Đơn giá ban đầu
-    gia_ban_dau = 50000 if "Phở" in z_mon_an else 20000
-    ten_mon = "Bát phở" if "Phở" in z_mon_an else "Ổ bánh mì"
+    # Tính lãi thực nhận khi rút sớm (lãi không kỳ hạn 0.2%)
+    lai_khong_ky_han = c_tien_gui * (0.2 / 100 / 12) * thang_rut_som
+    lai_dung_ky = c_tien_gui * (c_lai_suat / 100 / 12) * thang_rut_som
+    tien_mat = lai_dung_ky - lai_khong_ky_han
 
-    if st.button("🚨 KÍCH HOẠT MÔ PHỎNG TẬN THẾ", type="primary", use_container_width=True, key="btn_zombie"):
-        # Tính tổng tiền gửi theo lãi kép
-        tong_tien_nhan = z_tien_gui * ((1 + z_lai_suat / 100) ** z_nam)
-        
-        # Giá món ăn sau N năm siêu lạm phát
-        gia_mon_tuong_lai = gia_ban_dau * ((1 + lam_phat / 100) ** z_nam)
-        
-        # Sức mua (Số lượng món ăn)
-        so_mon_hien_tai = z_tien_gui / gia_ban_dau
-        so_mon_tuong_lai = tong_tien_nhan / gia_mon_tuong_lai
-        phantram_bien_dong = ((so_mon_tuong_lai - so_mon_hien_tai) / so_mon_hien_tai) * 100
-
-        st.divider()
-        st.subheader("💀 KẾT QUẢ SỨC MUA THỰC TẾ")
-
-        m_col1, m_col2, m_col3 = st.columns(3)
-        with m_col1:
-            st.metric(
-                label="Hôm nay mua được", 
-                value=f"{so_mon_hien_tai:,.0f} {ten_mon}".replace(",", ".")
-            )
-        with m_col2:
-            st.metric(
-                label=f"Sau {z_nam} năm mua được", 
-                value=f"{so_mon_tuong_lai:,.0f} {ten_mon}".replace(",", "."),
-                delta=f"{phantram_bien_dong:.1f}% sức mua",
-                delta_color="normal"
-            )
-        with m_col3:
-            st.metric(
-                label=f"Giá 1 {ten_mon} lúc đó", 
-                value=f"{gia_mon_tuong_lai:,.0f} VNĐ".replace(",", ".")
-            )
-
-        # Đánh giá cấp độ nguy hiểm
-        st.subheader("🩺 Đánh Giá Mức Độ Nguy Hiểm")
-        if lam_phat <= 8:
-            st.success("🟢 **An toàn:** Lạm phát ở mức kiểm soát. Tiết kiệm ngân hàng vẫn bảo toàn hoặc gia tăng giá trị thực.")
-        elif lam_phat <= 20:
-            st.warning("🟡 **Cảnh báo Lạm Phát Cao:** Tiền lãi ngân hàng bị bào mòn. Sức mua giảm nhẹ qua từng năm.")
-        elif lam_phat <= 50:
-            st.error("🟠 **Nguy hiểm (Bão Lạm Phát):** Đồng tiền mất giá nhanh chóng! Tiền lãi không bù đắp nổi đà tăng giá hàng hóa.")
-        else:
-            st.error("💀 **TẬN THẾ TÀI CHÍNH (Siêu Lạm Phát):** Tiền giấy biến thành 'giấy vụn'. Giữ tiền tiết kiệm đồng nghĩa với việc mất trắng tài sản!")
-
-        # Gợi ý hành động trú ẩn
-        with st.expander("🛡️ GỢI Ý HÀNH ĐỘNG TRÚ ẨN TÀI CHÍNH"):
-            if lam_phat > 20:
-                st.markdown("""
-                * **🥇 Vàng vật chất:** Kênh trú ẩn lịch sử chống lại sự sụp đổ của tiền giấy.
-                * **🌾 Hàng hóa thiết yếu & Lương thực:** Tích trữ tài sản có giá trị sử dụng trực tiếp.
-                * **💵 Ngoại tệ mạnh:** Chuyển đổi một phần sang các đồng tiền có độ ổn định cao hơn.
-                * **🏠 Bất động sản / Tài sản thực:** Giữ tài sản không thể tự dưng in thêm.
-                * **🚫 HÀNH ĐỘNG CẦN TRÁNH:** Không rút tiền mặt để dưới gối, không gia hạn các hợp đồng tiết kiệm dài hạn cố định lãi suất thấp.
-                """)
-            else:
-                st.markdown("""
-                * **🏦 Tiếp tục gửi tiết kiệm:** Lãi suất thực dương giúp tài sản an toàn.
-                * **📊 Đa dạng hóa:** Có thể trích 20-30% sang các kênh tăng trưởng khác như chứng khoán hoặc quỹ mở.
-                """)
+    st.error(f"💸 Nếu rút ở tháng thứ {thang_rut_som}, bạn chỉ nhận **{lai_khong_ky_han:,.0f} VNĐ** tiền lãi.")
+    st.warning(f"📉 Số tiền lãi bị mất đi (tiếc nuối): **{tien_mat:,.0f} VNĐ**!".replace(",", "."))
