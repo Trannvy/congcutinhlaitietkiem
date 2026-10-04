@@ -12,9 +12,9 @@ st.set_page_config(
 st.title("ỨNG DỤNG TÍNH LÃI GỬI TIẾT KIỆM_TRẦN NGỌC THÚY VY")
 
 # Tạo 3 Tab chức năng
-tab_normal, tab_reverse, tab_inflation = st.tabs([
+tab_normal, tab_creative, tab_inflation = st.tabs([
     "📊 Tính Lãi Tiết Kiệm", 
-    "🎯 Lãi Kép Ngược (Mục Tiêu)", 
+    "🎯 Mục Tiêu & Giả Lập Rút Sớm", 
     "🎈 Tác Động Lạm Phát"
 ])
 
@@ -72,7 +72,7 @@ with tab_normal:
         m = 1 if hinh_thuc_lanh == "Lãnh lãi theo tháng" else (3 if hinh_thuc_lanh == "Lãnh lãi theo quý" else ky_han_thang)
 
         if ky_han_thang % m != 0 and hinh_thuc_lanh != "Lãnh lãi cuối kỳ":
-            st.warning(f"⚠️ Kỳ hạn gửi ({ky_han_thang} tháng) không chia hết cho chu kỳ {hinh_thuc_lanh.lower()}. Kết quả tính theo số chu kỳ chẵn.")
+            st.warning(f"⚠️️ Kỳ hạn gửi ({ky_han_thang} tháng) không chia hết cho chu kỳ {hinh_thuc_lanh.lower()}. Kết quả tính theo số chu kỳ chẵn.")
 
         so_chu_ky = ky_han_thang // m
         
@@ -120,11 +120,11 @@ with tab_normal:
             st.dataframe(lich_trinh, use_container_width=True)
 
 # ===================================================================
-# TAB 2: LÃI KÉP NGƯỢC (TÍNH SỐ TIỀN CẦN GỬI THEO MỤC TIÊU)
+# TAB 2: LÃI KÉP NGƯỢC & GIẢ LẬP RÚT TIỀN TRƯỚC HẠN
 # ===================================================================
-with tab_reverse:
-    st.subheader("🎯 Tính Toán Tiền Gửi Cho Mục Tiêu Tài Chính")
-    st.write("Nhập mục tiêu số tiền bạn muốn đạt được trong tương lai, ứng dụng sẽ tính ra số tiền cần tích lũy.")
+with tab_creative:
+    st.subheader("🎯 1. Tính Toán Tiền Gửi Cho Mục Tiêu Tài Chính")
+    st.caption("Nhập số tiền bạn muốn đạt được trong tương lai để tính tiền gửi ban đầu hoặc tiền gửi góp hàng tháng.")
 
     col_rev1, col_rev2 = st.columns(2)
     with col_rev1:
@@ -155,7 +155,8 @@ with tab_reverse:
         )
         phuong_thuc = st.radio(
             "Cách thức tích lũy:",
-            options=["Gửi 1 lần ngay từ đầu", "Gửi góp định kỳ hàng tháng"]
+            options=["Gửi 1 lần ngay từ đầu", "Gửi góp định kỳ hàng tháng"],
+            key="rev_phuong_thuc"
         )
 
     if st.button("🧮 Tính Số Tiền Cần Gửi", type="primary", use_container_width=True, key="btn_rev"):
@@ -165,7 +166,6 @@ with tab_reverse:
 
         st.divider()
         if phuong_thuc == "Gửi 1 lần ngay từ đầu":
-            # Công thức tính gốc ban đầu P = FV / (1 + r)^n
             goc_can_gui = muc_tieu / ((1 + r_nam) ** thoi_gian_nam)
             tien_lai_nhan = muc_tieu - goc_can_gui
 
@@ -177,7 +177,6 @@ with tab_reverse:
                 st.metric("Tiền lãi ngân hàng hỗ trợ", f"{tien_lai_nhan:,.0f} VNĐ".replace(",", "."))
 
         else:
-            # Công thức gửi góp hàng tháng: PMT = FV * r / (((1 + r)^n - 1) * (1 + r))
             gop_hang_thang = muc_tieu * r_thang / (((1 + r_thang) ** n_thang - 1) * (1 + r_thang))
             tong_goc_gop = gop_hang_thang * n_thang
             tien_lai_nhan = muc_tieu - tong_goc_gop
@@ -189,6 +188,35 @@ with tab_reverse:
                 st.metric("Tổng tiền gốc bạn tự bỏ ra", f"{tong_goc_gop:,.0f} VNĐ".replace(",", "."))
             with res_r2:
                 st.metric("Tiền lãi sinh ra", f"{tien_lai_nhan:,.0f} VNĐ".replace(",", "."))
+
+    st.divider()
+
+    # SECTION 2: GIẢ LẬP RÚT TIỀN TRƯỚC HẠN
+    st.subheader("🚨 2. Giả Lập Phạt Rút Tiền Trước Hạn")
+    st.caption("Rút tiền trước hạn khiến toàn bộ tiền gửi bị tính theo lãi suất Không kỳ hạn (~0.2%/năm).")
+
+    col_rut1, col_rut2 = st.columns(2)
+    with col_rut1:
+        rut_tien_gui = st.number_input("Số tiền gửi (VNĐ):", value=100_000_000, step=10_000_000, key="rut_tien")
+        rut_ky_han = st.number_input("Kỳ hạn đăng ký (Tháng):", value=12, min_value=2, key="rut_ky_han")
+    with col_rut2:
+        rut_lai_suat = st.number_input("Lãi suất cam kết (%/năm):", value=6.0, step=0.5, key="rut_lai")
+        lai_khong_kh = st.number_input("Lãi suất không kỳ hạn (%/năm):", value=0.2, step=0.1, key="rut_lai_khkh")
+
+    thang_rut_som = st.slider("Giả sử bạn phải rút gấp ở tháng thứ:", min_value=1, max_value=int(rut_ky_han), value=int(rut_ky_han // 2))
+
+    # Tính toán
+    lai_dung_ky = rut_tien_gui * (rut_lai_suat / 100 / 12) * thang_rut_som
+    lai_thuc_nhan = rut_tien_gui * (lai_khong_kh / 100 / 12) * thang_rut_som
+    tien_mat_di = lai_dung_ky - lai_thuc_nhan
+
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
+        st.metric("Tổn thất (Số tiền lãi bị mất)", f"{tien_mat_di:,.0f} VNĐ".replace(",", "."))
+    with r_col2:
+        st.metric("Lãi thực nhận khi rút sớm", f"{lai_thuc_nhan:,.0f} VNĐ".replace(",", "."))
+
+    st.error(f"📉 Nếu rút ở tháng thứ **{thang_rut_som}**, bạn đánh mất **{tien_mat_di:,.0f} VNĐ** tiền lãi do bị tính lãi không kỳ hạn!".replace(",", "."))
 
 # ===================================================================
 # TAB 3: TÁC ĐỘNG CỦA LẠM PHÁT (SỨC MUA THỰC TẾ)
@@ -207,13 +235,8 @@ with tab_inflation:
         lam_phat = st.number_input("Tỷ lệ lạm phát dự kiến (%/năm):", value=3.5, step=0.1, key="inf_lam_phat")
 
     if st.button("📊 Tính Sức Mua Thực", type="primary", use_container_width=True, key="btn_inf"):
-        # Tổng tiền nhận được trên danh nghĩa (Lãi kép)
         tong_tien_danh_nghia = inf_tien_gui * ((1 + inf_lai_suat / 100) ** inf_nam)
-        
-        # Giá trị thực tế sau khi tính đến lạm phát: PV = FV / (1 + i)^n
         gia_tri_thuc_te = tong_tien_danh_nghia / ((1 + lam_phat / 100) ** inf_nam)
-        
-        # Lãi thực tế thu được (đã trừ lạm phát)
         lai_thuc_te = gia_tri_thuc_te - inf_tien_gui
 
         st.divider()
